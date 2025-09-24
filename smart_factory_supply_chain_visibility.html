@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tech Mahindra - Supply Chain Visibility</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #34495e;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            grid-template-rows: 60px 1fr;
+            grid-template-areas: 
+                "sidebar header"
+                "sidebar main";
+            height: 100vh;
+        }
+        
+        .header {
+            grid-area: header;
+            background: white;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+        
+        .header h1 {
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+        
+        .sidebar {
+            grid-area: sidebar;
+            background: var(--primary);
+            color: white;
+            padding: 20px 0;
+        }
+        
+        .logo {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .nav-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255,255,255,0.1);
+            border-left: 4px solid var(--secondary);
+        }
+        
+        .nav-item i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .main-content {
+            grid-area: main;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .content-section {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        
+        .content-section.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .section-title {
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+        
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .card h3 {
+            margin-bottom: 15px;
+            color: var(--dark);
+            font-size: 1.1rem;
+        }
+        
+        .kpi-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .kpi-good { color: var(--success); }
+        .kpi-warning { color: var(--warning); }
+        .kpi-bad { color: var(--danger); }
+        
+        .map-container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            height: 400px;
+            margin-bottom: 20px;
+        }
+        
+        #supplyChainMap {
+            width: 100%;
+            height: 100%;
+            border-radius: 4px;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-on-time { background: var(--success); }
+        .status-delayed { background: var(--warning); }
+        .status-critical { background: var(--danger); }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        .data-table th, .data-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .data-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+        
+        .data-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .alert {
+            padding: 12px 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border-left: 4px solid var(--warning);
+        }
+        
+        .alert-critical {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid var(--danger);
+        }
+        
+        .chart-container {
+            height: 300px;
+            margin: 20px 0;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .simulation-controls {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <header class="header">
+            <h1>Tech Mahindra Supply Chain Visibility</h1>
+            <div class="time-display" id="currentTime">Loading...</div>
+        </header>
+        
+        <nav class="sidebar">
+            <div class="logo">
+                <h2>Tech Mahindra</h2>
+            </div>
+            <div class="nav-item active" data-target="overview">
+                <i>📊</i> Overview
+            </div>
+            <div class="nav-item" data-target="inventory">
+                <i>📦</i> Inventory Tracking
+            </div>
+            <div class="nav-item" data-target="shipments">
+                <i>🚚</i> Shipment Tracking
+            </div>
+            <div class="nav-item" data-target="production">
+                <i>🏭</i> Production Status
+            </div>
+            <div class="nav-item" data-target="suppliers">
+                <i>👥</i> Supplier Network
+            </div>
+            <div class="nav-item" data-target="alerts">
+                <i>⚠️</i> Alerts & Issues
+            </div>
+            <a href="index.html" class="nav-item" style="text-decoration: none; color: white; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+                <i>↩️</i> Back to Landing Page
+            </a>
+        </nav>
+        
+        <main class="main-content">
+            <section id="overview" class="content-section active">
+                <h2 class="section-title">Supply Chain Overview</h2>
+                
+                <div class="simulation-controls">
+                    <h3>Data Simulation Controls</h3>
+                    <div class="controls">
+                        <button class="btn" id="generateData">Generate New Data</button>
+                        <button class="btn" id="startSimulation">Start Real-time Simulation</button>
+                        <button class="btn" id="stopSimulation">Stop Simulation</button>
+                        <button class="btn" id="clearData">Clear All Data</button>
+                    </div>
+                    <div id="simulationStatus">Simulation: Stopped</div>
+                </div>
+                
+                <div class="dashboard-cards">
+                    <div class="card">
+                        <h3>On-Time Delivery Rate</h3>
+                        <div class="kpi-value kpi-good" id="deliveryRate">0%</div>
+                        <p id="deliveryTrend">Trend: --</p>
+                    </div>
+                    <div class="card">
+                        <h3>Inventory Turnover</h3>
+                        <div class="kpi-value kpi-warning" id="inventoryTurnover">0</div>
+                        <p id="turnoverTrend">Target: 6.0</p>
+                    </div>
+                    <div class="card">
+                        <h3>Production Efficiency</h3>
+                        <div class="kpi-value kpi-good" id="productionEfficiency">0%</div>
+                        <p id="efficiencyTrend">Within target range</p>
+                    </div>
+                    <div class="card">
+                        <h3>Supplier Quality Score</h3>
+                        <div class="kpi-value kpi-bad" id="supplierQuality">0%</div>
+                        <p id="qualityTrend">Suppliers below target: 0</p>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3>Supply Chain Performance Trends</h3>
+                    <div class="chart-container">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="map-container">
+                    <h3>Global Supply Chain Map</h3>
+                    <div id="supplyChainMap"></div>
+                </div>
+                
+                <div class="card">
+                    <h3>Real-time Alerts</h3>
+                    <div id="alertsContainer"></div>
+                </div>
+            </section>
+            
+            <section id="inventory" class="content-section">
+                <h2 class="section-title">Inventory Analytics</h2>
+                <div class="card">
+                    <h3>Inventory Levels Over Time</h3>
+                    <div class="chart-container">
+                        <canvas id="inventoryChart"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Current Stock Levels</h3>
+                    <table class="data-table" id="inventoryTable">
+                        <thead>
+                            <tr>
+                                <th>Material</th>
+                                <th>Current Stock</th>
+                                <th>Safety Stock</th>
+                                <th>Status</th>
+                                <th>Days of Supply</th>
+                                <th>Last Updated</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventoryTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            
+            <section id="shipments" class="content-section">
+                <h2 class="section-title">Shipment Analytics</h2>
+                <div class="card">
+                    <h3>Shipment Status Distribution</h3>
+                    <div class="chart-container">
+                        <canvas id="shipmentChart"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Active Shipments</h3>
+                    <table class="data-table" id="shipmentsTable">
+                        <thead>
+                            <tr>
+                                <th>Shipment ID</th>
+                                <th>Origin</th>
+                                <th>Destination</th>
+                                <th>Status</th>
+                                <th>ETA</th>
+                                <th>Delay (days)</th>
+                                <th>Last Update</th>
+                            </tr>
+                        </thead>
+                        <tbody id="shipmentsTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            
+            <section id="production" class="content-section">
+                <h2 class="section-title">Production Analytics</h2>
+                <div class="card">
+                    <h3>Production Line Efficiency</h3>
+                    <div class="chart-container">
+                        <canvas id="productionChart"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Machine Performance</h3>
+                    <table class="data-table" id="productionTable">
+                        <thead>
+                            <tr>
+                                <th>Machine ID</th>
+                                <th>Product</th>
+                                <th>Status</th>
+                                <th>OEE</th>
+                                <th>Units/Hour</th>
+                                <th>Downtime</th>
+                                <th>Last Maintenance</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productionTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Data Management and Synthesis
+        class SupplyChainData {
+            constructor() {
+                this.data = this.loadData() || this.generateInitialData();
+                this.simulationInterval = null;
+                this.isSimulating = false;
+            }
+
+            generateInitialData() {
+                const materials = ['Steel Coils', 'Electronic Components', 'Component B-12', 'Plastic Pellets', 'Packaging Materials'];
+                const suppliers = ['Alpha Corp', 'Beta Industries', 'Gamma Supplies', 'Delta Materials', 'Epsilon Parts'];
+                const cities = ['Shanghai', 'Hamburg', 'Bangkok', 'Rotterdam', 'Singapore', 'Los Angeles', 'New York', 'Tokyo'];
+                
+                const baseData = {
+                    inventory: this.generateInventoryData(materials, suppliers),
+                    shipments: this.generateShipmentData(cities),
+                    production: this.generateProductionData(),
+                    metrics: this.generateMetricsHistory(30), // 30 days of history
+                    alerts: []
+                };
+                
+                this.saveData(baseData);
+                return baseData;
+            }
+
+            generateInventoryData(materials, suppliers) {
+                return materials.map(material => ({
+                    id: this.generateId(),
+                    material,
+                    supplier: suppliers[Math.floor(Math.random() * suppliers.length)],
+                    currentStock: Math.floor(Math.random() * 10000) + 1000,
+                    safetyStock: Math.floor(Math.random() * 2000) + 500,
+                    unit: material.includes('Coils') ? 'tons' : 'units',
+                    lastUpdated: new Date().toISOString(),
+                    history: this.generateInventoryHistory(30, material)
+                }));
+            }
+
+            generateShipmentData(cities) {
+                const statuses = ['In Transit', 'Delayed', 'At Port', 'Customs Hold', 'Delivered'];
+                const carriers = ['Maersk', 'CMA CGM', 'Evergreen', 'MSC', 'COSCO'];
+                
+                return Array.from({length: 15}, (_, i) => {
+                    const origin = cities[Math.floor(Math.random() * cities.length)];
+                    let destination;
+                    do {
+                        destination = cities[Math.floor(Math.random() * cities.length)];
+                    } while (destination === origin);
+                    
+                    const status = statuses[Math.floor(Math.random() * statuses.length)];
+                    const plannedDate = new Date(Date.now() + Math.random() * 10 * 24 * 60 * 60 * 1000);
+                    const actualDate = status === 'Delivered' ? 
+                        new Date(plannedDate.getTime() - Math.random() * 2 * 24 * 60 * 60 * 1000) : null;
+                    
+                    return {
+                        id: `SH${String(i+1).padStart(5, '0')}`,
+                        origin,
+                        destination,
+                        status,
+                        carrier: carriers[Math.floor(Math.random() * carriers.length)],
+                        plannedDelivery: plannedDate.toISOString(),
+                        actualDelivery: actualDate ? actualDate.toISOString() : null,
+                        lastUpdate: new Date().toISOString(),
+                        delayDays: status === 'Delayed' ? Math.floor(Math.random() * 5) + 1 : 0
+                    };
+                });
+            }
+
+            generateProductionData() {
+                const products = ['Product A', 'Product B', 'Product C', 'Product D'];
+                const statuses = ['Running', 'Idle', 'Maintenance', 'Fault'];
+                
+                return Array.from({length: 8}, (_, i) => ({
+                    machineId: `M${String(i+1).padStart(3, '0')}`,
+                    product: products[Math.floor(Math.random() * products.length)],
+                    status: statuses[Math.floor(Math.random() * statuses.length)],
+                    oee: Math.random() * 30 + 70, // 70-100%
+                    unitsPerHour: Math.floor(Math.random() * 100) + 50,
+                    downtime: Math.random() * 20,
+                    lastMaintenance: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString()
+                }));
+            }
+
+            generateMetricsHistory(days) {
+                const history = [];
+                const baseDate = new Date();
+                
+                for (let i = days; i >= 0; i--) {
+                    const date = new Date(baseDate);
+                    date.setDate(date.getDate() - i);
+                    
+                    history.push({
+                        timestamp: date.toISOString(),
+                        deliveryRate: 85 + Math.random() * 10,
+                        inventoryTurnover: 4 + Math.random() * 3,
+                        productionEfficiency: 80 + Math.random() * 15,
+                        supplierQuality: 75 + Math.random() * 20
+                    });
+                }
+                return history;
+            }
+
+            generateInventoryHistory(days, material) {
+                const history = [];
+                let currentStock = Math.floor(Math.random() * 10000) + 1000;
+                const baseDate = new Date();
+                
+                for (let i = days; i >= 0; i--) {
+                    const date = new Date(baseDate);
+                    date.setDate(date.getDate() - i);
+                    
+                    // Simulate daily fluctuations
+                    currentStock += Math.floor(Math.random() * 200) - 100;
+                    currentStock = Math.max(500, currentStock); // Prevent negative stock
+                    
+                    history.push({
+                        timestamp: date.toISOString(),
+                        stockLevel: currentStock
+                    });
+                }
+                return history;
+            }
+
+            updateData() {
+                if (!this.isSimulating) return;
+                
+                const now = new Date().toISOString();
+                
+                // Update shipments
+                this.data.shipments.forEach(shipment => {
+                    if (shipment.status !== 'Delivered') {
+                        // 5% chance of status change
+                        if (Math.random() < 0.05) {
+                            const statuses = ['In Transit', 'Delayed', 'At Port', 'Customs Hold'];
+                            shipment.status = statuses[Math.floor(Math.random() * statuses.length)];
+                            shipment.lastUpdate = now;
+                            
+                            if (shipment.status === 'Delayed') {
+                                shipment.delayDays = Math.floor(Math.random() * 5) + 1;
+                                this.addAlert(`Shipment ${shipment.id} delayed by ${shipment.delayDays} days`, 'warning');
+                            }
+                        }
+                    }
+                });
+                
+                // Update inventory with small random fluctuations
+                this.data.inventory.forEach(item => {
+                    const fluctuation = Math.floor(Math.random() * 20) - 10;
+                    item.currentStock = Math.max(0, item.currentStock + fluctuation);
+                    item.lastUpdated = now;
+                    
+                    // Check for low stock alerts
+                    if (item.currentStock < item.safetyStock * 1.1) {
+                        this.addAlert(`Low stock alert for ${item.material}: ${item.currentStock} ${item.unit} remaining`, 'critical');
+                    }
+                });
+                
+                // Update production metrics
+                this.data.production.forEach(machine => {
+                    machine.oee += (Math.random() - 0.5) * 2;
+                    machine.oee = Math.max(50, Math.min(100, machine.oee));
+                    machine.unitsPerHour += Math.floor(Math.random() * 10) - 5;
+                    machine.unitsPerHour = Math.max(30, machine.unitsPerHour);
+                });
+                
+                // Add new metrics point
+                this.data.metrics.push({
+                    timestamp: now,
+                    deliveryRate: 85 + Math.random() * 10,
+                    inventoryTurnover: 4 + Math.random() * 3,
+                    productionEfficiency: 80 + Math.random() * 15,
+                    supplierQuality: 75 + Math.random() * 20
+                });
+                
+                // Keep only last 100 data points
+                if (this.data.metrics.length > 100) {
+                    this.data.metrics = this.data.metrics.slice(-100);
+                }
+                
+                this.saveData(this.data);
+                this.onDataUpdate(this.data);
+            }
+
+            addAlert(message, type) {
+                const alert = {
+                    id: this.generateId(),
+                    message,
+                    type,
+                    timestamp: new Date().toISOString(),
+                    acknowledged: false
+                };
+                
+                this.data.alerts.unshift(alert);
+                // Keep only last 20 alerts
+                if (this.data.alerts.length > 20) {
+                    this.data.alerts = this.data.alerts.slice(0, 20);
+                }
+            }
+
+            generateId() {
+                return Math.random().toString(36).substr(2, 9);
+            }
+
+            loadData() {
+                const saved = localStorage.getItem('supplyChainData');
+                return saved ? JSON.parse(saved) : null;
+            }
+
+            saveData(data) {
+                localStorage.setItem('supplyChainData', JSON.stringify(data));
+            }
+
+            clearData() {
+                localStorage.removeItem('supplyChainData');
+                this.data = this.generateInitialData();
+            }
+
+            startSimulation(callback) {
+                this.isSimulating = true;
+                this.onDataUpdate = callback;
+                this.simulationInterval = setInterval(() => this.updateData(), 3000); // Update every 3 seconds
+            }
+
+            stopSimulation() {
+                this.isSimulating = false;
+                if (this.simulationInterval) {
+                    clearInterval(this.simulationInterval);
+                    this.simulationInterval = null;
+                }
+            }
+        }
+
+        // Visualization Manager
+        class VisualizationManager {
+            constructor() {
+                this.charts = {};
+                this.map = null;
+                this.initMap();
+            }
+
+            initMap() {
+                this.map = L.map('supplyChainMap').setView([20, 0], 2);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(this.map);
+            }
+
+            updateMap(shipments) {
+                this.map.eachLayer(layer => {
+                    if (layer instanceof L.Marker) {
+                        this.map.removeLayer(layer);
+                    }
+                });
+
+                shipments.forEach(shipment => {
+                    // Simple coordinate mapping for demo
+                    const getCoords = (city) => {
+                        const coords = {
+                            'Shanghai': [31.2304, 121.4737],
+                            'Hamburg': [53.5511, 9.9937],
+                            'Bangkok': [13.7563, 100.5018],
+                            'Rotterdam': [51.9244, 4.4777],
+                            'Singapore': [1.3521, 103.8198],
+                            'Los Angeles': [34.0522, -118.2437],
+                            'New York': [40.7128, -74.0060],
+                            'Tokyo': [35.6762, 139.6503]
+                        };
+                        return coords[city] || [20 + Math.random() * 40, -100 + Math.random() * 200];
+                    };
+
+                    const originCoords = getCoords(shipment.origin);
+                    const destCoords = getCoords(shipment.destination);
+
+                    L.marker(originCoords).addTo(this.map)
+                        .bindPopup(`Origin: ${shipment.origin}<br>Shipment: ${shipment.id}`);
+                    
+                    L.marker(destCoords).addTo(this.map)
+                        .bindPopup(`Destination: ${shipment.destination}<br>Status: ${shipment.status}`);
+                    
+                    L.polyline([originCoords, destCoords], {color: 'blue'}).addTo(this.map);
+                });
+            }
+
+            createPerformanceChart(data) {
+                const ctx = document.getElementById('performanceChart').getContext('2d');
+                const labels = data.metrics.slice(-30).map(m => new Date(m.timestamp).toLocaleDateString());
+                const metrics = data.metrics.slice(-30);
+
+                if (this.charts.performance) {
+                    this.charts.performance.destroy();
+                }
+
+                this.charts.performance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Delivery Rate %',
+                                data: metrics.map(m => m.deliveryRate),
+                                borderColor: '#27ae60',
+                                tension: 0.1
+                            },
+                            {
+                                label: 'Production Efficiency %',
+                                data: metrics.map(m => m.productionEfficiency),
+                                borderColor: '#3498db',
+                                tension: 0.1
+                            },
+                            {
+                                label: 'Supplier Quality %',
+                                data: metrics.map(m => m.supplierQuality),
+                                borderColor: '#e74c3c',
+                                tension: 0.1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                min: 50
+                            }
+                        }
+                    }
+                });
+            }
+
+            createInventoryChart(data) {
+                const ctx = document.getElementById('inventoryChart').getContext('2d');
+                const recentData = data.inventory[0].history.slice(-30);
+                const labels = recentData.map(d => new Date(d.timestamp).toLocaleDateString());
+
+                if (this.charts.inventory) {
+                    this.charts.inventory.destroy();
+                }
+
+                this.charts.inventory = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: data.inventory.map((item, index) => ({
+                            label: item.material,
+                            data: item.history.slice(-30).map(h => h.stockLevel),
+                            borderColor: this.getColor(index),
+                            tension: 0.1
+                        }))
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+
+            createShipmentChart(data) {
+                const ctx = document.getElementById('shipmentChart').getContext('2d');
+                const statusCount = data.shipments.reduce((acc, shipment) => {
+                    acc[shipment.status] = (acc[shipment.status] || 0) + 1;
+                    return acc;
+                }, {});
+
+                if (this.charts.shipment) {
+                    this.charts.shipment.destroy();
+                }
+
+                this.charts.shipment = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(statusCount),
+                        datasets: [{
+                            data: Object.values(statusCount),
+                            backgroundColor: ['#27ae60', '#f39c12', '#3498db', '#e74c3c', '#9b59b6']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+
+            createProductionChart(data) {
+                const ctx = document.getElementById('productionChart').getContext('2d');
+                const machines = data.production;
+
+                if (this.charts.production) {
+                    this.charts.production.destroy();
+                }
+
+                this.charts.production = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: machines.map(m => m.machineId),
+                        datasets: [{
+                            label: 'OEE %',
+                            data: machines.map(m => m.oee),
+                            backgroundColor: machines.map(m => 
+                                m.oee > 85 ? '#27ae60' : m.oee > 70 ? '#f39c12' : '#e74c3c'
+                            )
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100
+                            }
+                        }
+                    }
+                });
+            }
+
+            getColor(index) {
+                const colors = ['#3498db', '#e74c3c', '#27ae60', '#f39c12', '#9b59b6', '#34495e'];
+                return colors[index % colors.length];
+            }
+        }
+
+        // UI Manager
+        class UIManager {
+            constructor() {
+                this.dataManager = new SupplyChainData();
+                this.vizManager = new VisualizationManager();
+                this.currentSection = 'overview';
+                this.init();
+            }
+
+            init() {
+                this.setupNavigation();
+                this.setupControls();
+                this.updateTime();
+                this.renderAll();
+                
+                setInterval(() => this.updateTime(), 1000);
+            }
+
+            setupNavigation() {
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                        document.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
+                        
+                        item.classList.add('active');
+                        const targetId = item.getAttribute('data-target');
+                        document.getElementById(targetId).classList.add('active');
+                        this.currentSection = targetId;
+                        
+                        this.renderSection(targetId);
+                    });
+                });
+            }
+
+            setupControls() {
+                document.getElementById('generateData').addEventListener('click', () => {
+                    this.dataManager.clearData();
+                    this.renderAll();
+                });
+
+                document.getElementById('startSimulation').addEventListener('click', () => {
+                    this.dataManager.startSimulation((data) => this.renderAll());
+                    document.getElementById('simulationStatus').textContent = 'Simulation: Running';
+                });
+
+                document.getElementById('stopSimulation').addEventListener('click', () => {
+                    this.dataManager.stopSimulation();
+                    document.getElementById('simulationStatus').textContent = 'Simulation: Stopped';
+                });
+
+                document.getElementById('clearData').addEventListener('click', () => {
+                    this.dataManager.clearData();
+                    this.renderAll();
+                });
+            }
+
+            updateTime() {
+                const now = new Date();
+                document.getElementById('currentTime').textContent = 
+                    now.toLocaleString('en-US', { 
+                        year: 'numeric', 
+                        month: 'short', 
+                        day: 'numeric',
+                        hour: '2-digit', 
+                        minute: '2-digit',
+                        second: '2-digit',
+                        fractionalSecondDigits: 3
+                    });
+            }
+
+            renderAll() {
+                this.renderOverview();
+                this.renderInventory();
+                this.renderShipments();
+                this.renderProduction();
+            }
+
+            renderSection(section) {
+                switch(section) {
+                    case 'overview': this.renderOverview(); break;
+                    case 'inventory': this.renderInventory(); break;
+                    case 'shipments': this.renderShipments(); break;
+                    case 'production': this.renderProduction(); break;
+                }
+            }
+
+            renderOverview() {
+                const data = this.dataManager.data;
+                const latestMetrics = data.metrics[data.metrics.length - 1];
+                
+                // Update KPIs
+                document.getElementById('deliveryRate').textContent = latestMetrics.deliveryRate.toFixed(1) + '%';
+                document.getElementById('inventoryTurnover').textContent = latestMetrics.inventoryTurnover.toFixed(1);
+                document.getElementById('productionEfficiency').textContent = latestMetrics.productionEfficiency.toFixed(1) + '%';
+                document.getElementById('supplierQuality').textContent = latestMetrics.supplierQuality.toFixed(1) + '%';
+                
+                // Update charts
+                this.vizManager.createPerformanceChart(data);
+                this.vizManager.updateMap(data.shipments);
+                
+                // Render alerts
+                this.renderAlerts(data.alerts);
+            }
+
+            renderInventory() {
+                const data = this.dataManager.data;
+                this.vizManager.createInventoryChart(data);
+                
+                const tbody = document.getElementById('inventoryTableBody');
+                tbody.innerHTML = data.inventory.map(item => `
+                    <tr>
+                        <td>${item.material}</td>
+                        <td>${item.currentStock.toLocaleString()} ${item.unit}</td>
+                        <td>${item.safetyStock.toLocaleString()} ${item.unit}</td>
+                        <td>
+                            <span class="status-indicator ${item.currentStock > item.safetyStock * 1.5 ? 'status-on-time' : 
+                                item.currentStock > item.safetyStock ? 'status-delayed' : 'status-critical'}"></span>
+                            ${item.currentStock > item.safetyStock * 1.5 ? 'Healthy' : 
+                              item.currentStock > item.safetyStock ? 'Watch' : 'Critical'}
+                        </td>
+                        <td>${Math.round(item.currentStock / (item.currentStock / 30))}</td>
+                        <td>${new Date(item.lastUpdated).toLocaleString()}</td>
+                    </tr>
+                `).join('');
+            }
+
+            renderShipments() {
+                const data = this.dataManager.data;
+                this.vizManager.createShipmentChart(data);
+                
+                const tbody = document.getElementById('shipmentsTableBody');
+                tbody.innerHTML = data.shipments.map(shipment => `
+                    <tr>
+                        <td>${shipment.id}</td>
+                        <td>${shipment.origin}</td>
+                        <td>${shipment.destination}</td>
+                        <td>
+                            <span class="status-indicator ${shipment.status === 'Delivered' ? 'status-on-time' : 
+                                shipment.status === 'Delayed' ? 'status-critical' : 'status-delayed'}"></span>
+                            ${shipment.status}
+                        </td>
+                        <td>${new Date(shipment.plannedDelivery).toLocaleDateString()}</td>
+                        <td>${shipment.delayDays || 0}</td>
+                        <td>${new Date(shipment.lastUpdate).toLocaleString()}</td>
+                    </tr>
+                `).join('');
+            }
+
+            renderProduction() {
+                const data = this.dataManager.data;
+                this.vizManager.createProductionChart(data);
+                
+                const tbody = document.getElementById('productionTableBody');
+                tbody.innerHTML = data.production.map(machine => `
+                    <tr>
+                        <td>${machine.machineId}</td>
+                        <td>${machine.product}</td>
+                        <td>
+                            <span class="status-indicator ${machine.status === 'Running' ? 'status-on-time' : 
+                                machine.status === 'Maintenance' ? 'status-delayed' : 'status-critical'}"></span>
+                            ${machine.status}
+                        </td>
+                        <td>${machine.oee.toFixed(1)}%</td>
+                        <td>${machine.unitsPerHour}</td>
+                        <td>${machine.downtime.toFixed(1)}%</td>
+                        <td>${new Date(machine.lastMaintenance).toLocaleDateString()}</td>
+                    </tr>
+                `).join('');
+            }
+
+            renderAlerts(alerts) {
+                const container = document.getElementById('alertsContainer');
+                container.innerHTML = alerts.slice(0, 5).map(alert => `
+                    <div class="alert ${alert.type === 'warning' ? 'alert-warning' : 'alert-critical'}">
+                        <span class="status-indicator ${alert.type === 'warning' ? 'status-delayed' : 'status-critical'}"></span>
+                        ${alert.message} (${new Date(alert.timestamp).toLocaleString()})
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', () => {
+            new UIManager();
+        });
+    </script>
+</body>
+</html>
