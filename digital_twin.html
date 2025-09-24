@@ -649,6 +649,22 @@
         .schedule-item:last-child {
             border-bottom: none;
         }
+
+        .tooltip-3d {
+            position: absolute;
+            display: none;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid var(--cyber-blue);
+            color: #e2e8f0;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            pointer-events: none;
+            z-index: 1001;
+            box-shadow: 0 4px 12px rgba(0, 180, 216, 0.3);
+            white-space: nowrap;
+            transition: opacity 0.2s;
+        }
     </style>
 </head>
 <body>
@@ -1552,7 +1568,7 @@
             }
 
             updateMachineData(now) {
-                this.data.machines.forEach(machine => {
+                this.data.machines.forEach(machine => {                    
                     // Simulate small fluctuations with millisecond precision
                     const fluctuation = (Math.random() - 0.5) * 0.02 * this.simulationSpeed;
                     machine.efficiency = Math.max(0.7, Math.min(0.98, machine.efficiency + fluctuation));
@@ -1565,8 +1581,25 @@
                     const baseOutput = 10 * this.simulationSpeed;
                     machine.output += baseOutput * machine.efficiency;
                     
-                    // Health degradation over time
-                    machine.health = Math.max(0.3, machine.health - 0.0001 * this.simulationSpeed);
+                    // More defined state changes
+                    if (Math.random() < 0.005 * this.simulationSpeed) {
+                        const states = ['running', 'idle', 'fault', 'maintenance'];
+                        machine.status = states[Math.floor(Math.random() * states.length)];
+                    }
+
+                    // Health degradation/improvement based on state
+                    if (machine.status === 'fault') {
+                        machine.health = Math.max(0.1, machine.health - 0.01 * this.simulationSpeed);
+                    } else if (machine.status === 'maintenance') {
+                        machine.health = Math.min(1.0, machine.health + 0.02 * this.simulationSpeed);
+                        if (machine.health > 0.95) machine.status = 'idle'; // Finish maintenance
+                    } else if (machine.status === 'running') {
+                        machine.health = Math.max(0.3, machine.health - 0.0005 * this.simulationSpeed);
+                    } else { // idle
+                        machine.health = Math.max(0.3, machine.health - 0.0001 * this.simulationSpeed);
+                    }
+
+                    machine.health = Math.max(0, Math.min(1, machine.health));
                     
                     // Energy usage
                     machine.energyUsage += machine.powerRating * this.simulationSpeed / 60; // kWh
@@ -2284,11 +2317,168 @@
             }
         }
 
+        // 3D Visualization for the Factory Twin
+        class ThreeDVisualization {
+            constructor(containerId, dataManager) {
+                this.container = document.getElementById(containerId);
+                if (!this.container) {
+                    console.error("3D container not found!");
+                    return;
+                }
+                this.dataManager = dataManager;
+                this.raycaster = new THREE.Raycaster();
+                this.mouse = new THREE.Vector2();
+                this.intersected = null;
+                this.machines = {};
+                this.init();
+                this.animate();
+            }
+
+            init() {
+                // Scene
+                this.scene = new THREE.Scene();
+                this.scene.background = new THREE.Color(0x0a0f1a);
+
+                // Camera
+                this.camera = new THREE.PerspectiveCamera(75, this.container.clientWidth / this.container.clientHeight, 0.1, 1000);
+                this.camera.position.set(15, 20, 25);
+
+                // Renderer
+                this.renderer = new THREE.WebGLRenderer({ antialias: true });
+                this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
+                this.renderer.setPixelRatio(window.devicePixelRatio);
+                this.renderer.shadowMap.enabled = true;
+                this.container.appendChild(this.renderer.domElement);
+
+                // Controls
+                this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+                this.controls.enableDamping = true;
+
+                // Lighting
+                const ambientLight = new THREE.AmbientLight(0x404040, 2);
+                this.scene.add(ambientLight);
+
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5);
+                directionalLight.position.set(30, 40, 20);
+                directionalLight.castShadow = true;
+                this.scene.add(directionalLight);
+
+                // Create Factory Layout
+                this.createFactoryLayout();
+
+                // Handle window resizing
+                window.addEventListener('resize', () => this.onWindowResize(), false);
+                this.renderer.domElement.addEventListener('mousemove', (e) => this.onMouseMove(e), false);
+
+                // Tooltip
+                this.tooltip = document.createElement('div');
+                this.tooltip.className = 'tooltip-3d';
+                document.body.appendChild(this.tooltip);
+            }
+
+            createFactoryLayout() {
+                // Grid Floor
+                const gridHelper = new THREE.GridHelper(60, 30, 0x444444, 0x888888);
+                this.scene.add(gridHelper);
+
+                // Add solid machines
+                const machineGeometry = new THREE.BoxGeometry(4, 6, 4);
+
+                const positions = [
+                    [-20, 3, -10], [-10, 3, -10], [0, 3, -10], [10, 3, -10],
+                    [-20, 3, 10], [-10, 3, 10], [0, 3, 10], [10, 3, 10]
+                ];
+
+                for (let i = 0; i < 8; i++) {
+                    const machineMaterial = new THREE.MeshStandardMaterial({ 
+                        color: 0x00ff88, // Default to cyber green
+                        metalness: 0.2,
+                        roughness: 0.7
+                    });
+                    const machine = new THREE.Mesh(machineGeometry, machineMaterial);
+                    machine.position.set(positions[i][0], positions[i][1], positions[i][2]);
+                    machine.castShadow = true;
+                    machine.receiveShadow = true;
+                    machine.userData.id = `M-00${i + 1}`; // Store ID for raycasting
+                    const machineId = `M-00${i + 1}`;
+                    this.machines[machineId] = machine;
+                    this.scene.add(machine);
+                }
+            }
+
+            updateMachineStatus(machinesData) {
+                machinesData.forEach(machineData => {
+                    const machineObject = this.machines[machineData.id];
+                    if (machineObject) {
+                        const health = machineData.health;
+                        // Use theme colors for status
+                        const color = health > 0.8 ? 0x00ff88 : // cyber-green
+                                      health > 0.4 ? 0xff9800 : // warning-orange
+                                                     0xf44336;   // danger-red
+                        machineObject.material.color.setHex(color);
+                    }
+                });
+            }
+
+            animate = () => {
+                requestAnimationFrame(this.animate);
+                this.controls.update();
+
+                // Raycasting for hover
+                this.raycaster.setFromCamera(this.mouse, this.camera);
+                const intersects = this.raycaster.intersectObjects(Object.values(this.machines));
+
+                if (intersects.length > 0) {
+                    if (this.intersected !== intersects[0].object) {
+                        this.intersected = intersects[0].object;
+                        const machineId = this.intersected.userData.id;
+                        const machineData = this.dataManager.data.machines.find(m => m.id === machineId);
+                        
+                        if (machineData) {
+                            this.tooltip.style.display = 'block';
+                            this.tooltip.innerHTML = `
+                                <strong>ID:</strong> ${machineData.id}<br>
+                                <strong>Name:</strong> ${machineData.name}<br>
+                                <strong>Status:</strong> ${machineData.status}<br>
+                                <strong>Health:</strong> ${(machineData.health * 100).toFixed(1)}%<br>
+                                <strong>Temp:</strong> ${machineData.temperature.toFixed(1)}°C<br>
+                                <strong>Vibration:</strong> ${machineData.vibration.toFixed(2)}g
+                            `;
+                        }
+                    }
+                } else {
+                    if (this.intersected) {
+                        // No intersection
+                    }
+                    this.intersected = null;
+                    this.tooltip.style.display = 'none';
+                }
+
+                this.renderer.render(this.scene, this.camera);
+            }
+
+            onMouseMove(event) {
+                event.preventDefault();
+                const rect = this.renderer.domElement.getBoundingClientRect();
+                this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+                this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+                this.tooltip.style.left = `${event.clientX + 15}px`;
+                this.tooltip.style.top = `${event.clientY + 15}px`;
+            }
+
+            onWindowResize() {
+                this.camera.aspect = this.container.clientWidth / this.container.clientHeight;
+                this.camera.updateProjectionMatrix();
+                this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
+            }
+        }
+
         // Complete UI Manager for all sections
         class CompleteDigitalTwinUI {
             constructor() {
                 this.dataManager = new CompleteDigitalTwinData();
                 this.vizManager = new CompleteVisualizationManager();
+                this.threeDVis = new ThreeDVisualization('factoryTwin', this.dataManager);
                 this.init();
             }
 
@@ -2458,6 +2648,9 @@
                 
                 this.renderMachineStatus(data.machines);
                 this.renderAlerts(data.alerts);
+
+                // Update 3D visualization
+                this.threeDVis.updateMachineStatus(data.machines);
             }
 
             renderProductionSection(data) {
@@ -2581,7 +2774,7 @@
                         <div class="machine-info">
                             <div class="machine-name">${machine.name} (${machine.id})</div>
                             <div class="machine-stats">
-                                <span>Eff: ${(machine.efficiency * 100).toFixed(1)}%</span>
+                                <span>Status: ${machine.status}</span>
                                 <span>Temp: ${machine.temperature.toFixed(1)}°C</span>
                                 <span>Health: ${(machine.health * 100).toFixed(1)}%</span>
                             </div>
