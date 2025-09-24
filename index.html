@@ -674,6 +674,41 @@
                 font-size: 2.2rem;
             }
         }
+/* Form validation styles */
+.form-control:invalid {
+    border-color: #ff3860;
+}
+
+.form-control:valid {
+    border-color: #00ff9d;
+}
+
+#form-message.success {
+    color: #00ff9d;
+    padding: 10px;
+    background: rgba(0, 255, 157, 0.1);
+    border-radius: 4px;
+    border-left: 4px solid #00ff9d;
+}
+
+#form-message.error {
+    color: #ff3860;
+    padding: 10px;
+    background: rgba(255, 56, 96, 0.1);
+    border-radius: 4px;
+    border-left: 4px solid #ff3860;
+}
+
+/* Loading animation */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.fa-spin {
+    animation: spin 1s linear infinite;
+}
+        
     </style>
 </head>
 <body>
@@ -924,7 +959,7 @@
                 </div>
                 
                 <div class="contact-form">
-                    <form>
+                    <form action="https://formspree.io/f/xeorqvyd" method=POST>
                         <div class="form-group">
                             <label for="name">Full Name</label>
                             <input type="text" id="name" class="form-control" placeholder="Your Name">
@@ -1058,6 +1093,117 @@
                 });
             });
         });
+// Contact form handling
+document.addEventListener('DOMContentLoaded', function() {
+    const contactForm = document.getElementById('contact-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const submitText = document.getElementById('submit-text');
+    const submitSpinner = document.getElementById('submit-spinner');
+    const formMessage = document.getElementById('form-message');
+    
+    if (contactForm) {
+        contactForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Show loading state
+            submitText.style.display = 'none';
+            submitSpinner.style.display = 'block';
+            submitBtn.disabled = true;
+            
+            // Basic validation
+            const requiredFields = contactForm.querySelectorAll('[required]');
+            let isValid = true;
+            
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    isValid = false;
+                    field.style.borderColor = '#ff3860';
+                } else {
+                    field.style.borderColor = '';
+                }
+            });
+            
+            if (!isValid) {
+                showMessage('Please fill in all required fields.', 'error');
+                submitText.style.display = 'block';
+                submitSpinner.style.display = 'none';
+                submitBtn.disabled = false;
+                return;
+            }
+            
+            // Honeypot check
+            const honeypot = document.getElementById('website').value;
+            if (honeypot) {
+                // Bot detected - silently succeed
+                showMessage('Thank you for your message! We will get back to you soon.', 'success');
+                contactForm.reset();
+                submitText.style.display = 'block';
+                submitSpinner.style.display = 'none';
+                submitBtn.disabled = false;
+                return;
+            }
+            
+            try {
+                const formData = new FormData(contactForm);
+                
+                // Send to Formspree
+                const response = await fetch(contactForm.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    showMessage('Thank you for your message! We will get back to you within 24 hours.', 'success');
+                    contactForm.reset();
+                } else {
+                    throw new Error('Form submission failed');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Sorry, there was an error sending your message. Please try again or email us directly at manufacturing@nexustech.com', 'error');
+            } finally {
+                submitText.style.display = 'block';
+                submitSpinner.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+        });
+        
+        function showMessage(message, type) {
+            formMessage.textContent = message;
+            formMessage.style.display = 'block';
+            formMessage.className = type; // 'success' or 'error'
+            
+            if (type === 'success') {
+                formMessage.style.color = '#00ff9d';
+            } else {
+                formMessage.style.color = '#ff3860';
+            }
+            
+            // Auto-hide success messages after 5 seconds
+            if (type === 'success') {
+                setTimeout(() => {
+                    formMessage.style.display = 'none';
+                }, 5000);
+            }
+        }
+        
+        // Real-time validation
+        const inputs = contactForm.querySelectorAll('input, textarea, select');
+        inputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                if (this.hasAttribute('required') && !this.value.trim()) {
+                    this.style.borderColor = '#ff3860';
+                } else {
+                    this.style.borderColor = '';
+                }
+            });
+        });
+    }
+});
+        
     </script>
 </body>
 </html>
