@@ -1,0 +1,327 @@
+{
+    "templateName": "Application Portfolio Assessment Framework",
+    "templateId": "app-portfolio-assessment-v1",
+    "description": "Comprehensive assessment framework for evaluating applications across business value, technical health, cost, and modernization potential.",
+    "dimensions": [
+        {
+            "id": 1,
+            "name": "1. Business Criticality & Impact",
+            "weight": 30,
+            "description": "Evaluates the application's importance to business operations, revenue, and customer impact.",
+            "aspects": [
+                {
+                    "name": "1.1. Revenue Impact & Dependency",
+                    "weight": 40,
+                    "rationale": "Applications that directly generate or support revenue are critical to business survival and growth.",
+                    "questions": [
+                        {
+                            "id": "1.1.1",
+                            "text": "Does this application directly generate revenue (e.g., e-commerce platform, subscription service)?",
+                            "why": "Direct revenue generation represents the highest level of business criticality, as application failure directly impacts the company's bottom line."
+                        },
+                        {
+                            "id": "1.1.2",
+                            "text": "What is the estimated financial impact per hour of application downtime?",
+                            "why": "Quantifying downtime cost helps prioritize investments in reliability and disaster recovery based on actual business impact."
+                        },
+                        {
+                            "id": "1.1.3",
+                            "text": "How many critical business processes (order fulfillment, manufacturing, billing) would be disrupted by application failure?",
+                            "why": "Understanding process dependencies reveals the application's role in core business operations and helps assess operational risk."
+                        },
+                        {
+                            "id": "1.1.4",
+                            "text": "What percentage of employees rely on this application to perform their primary job functions?",
+                            "why": "Widespread user dependency indicates high organizational impact and potential productivity loss during outages."
+                        },
+                        {
+                            "id": "1.1.5",
+                            "text": "Does this application serve external customers or partners directly?",
+                            "why": "Customer-facing applications have higher visibility and direct impact on customer satisfaction and brand reputation."
+                        }
+                    ]
+                },
+                {
+                    "name": "1.2. Strategic Alignment & Value",
+                    "weight": 60,
+                    "rationale": "Applications must align with and enable strategic business objectives to justify investment and maintenance.",
+                    "questions": [
+                        {
+                            "id": "1.2.1",
+                            "text": "How directly does this application support achievement of key business strategy objectives?",
+                            "why": "Strategic alignment ensures IT investments are focused on enabling business goals rather than maintaining legacy systems with diminishing returns."
+                        },
+                        {
+                            "id": "1.2.2",
+                            "text": "What unique business capabilities or competitive advantages does this application enable?",
+                            "why": "Applications providing competitive differentiation warrant higher investment to maintain and enhance their strategic value."
+                        },
+                        {
+                            "id": "1.2.3",
+                            "text": "How would decommissioning this application impact business operations and strategic initiatives?",
+                            "why": "Understanding the consequences of removal helps determine if an application is truly essential or a candidate for retirement."
+                        },
+                        {
+                            "id": "1.2.4",
+                            "text": "What is the business's appetite for investing in this application's evolution and modernization?",
+                            "why": "Business sponsorship and willingness to invest are critical factors in determining the application's future and modernization priority."
+                        },
+                        {
+                            "id": "1.2.5",
+                            "text": "How does this application integrate with and support other critical business systems and processes?",
+                            "why": "Integration points reveal dependencies and the application's role in broader business ecosystems, affecting change management complexity."
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "name": "2. Technical Health & Obsolescence",
+            "weight": 25,
+            "description": "Assesses the application's technical condition, modernity, and freedom from operational debt.",
+            "aspects": [
+                {
+                    "name": "2.1. Technology Stack & Modernity",
+                    "weight": 35,
+                    "rationale": "Current technologies reduce security risks, improve maintainability, and leverage modern capabilities.",
+                    "questions": [
+                        {
+                            "id": "2.1.1",
+                            "text": "What is the support status of the application's core technologies (programming languages, frameworks, databases)?",
+                            "why": "Unsupported or end-of-life technologies pose security risks, compliance issues, and increasing maintenance costs."
+                        },
+                        {
+                            "id": "2.1.2",
+                            "text": "How difficult is it to find developers with expertise in this application's technology stack?",
+                            "why": "Scarce skills increase labor costs, extend hiring timelines, and create key-person dependency risks."
+                        },
+                        {
+                            "id": "2.1.3",
+                            "text": "Does the application architecture leverage modern patterns (microservices, cloud-native, API-first)?",
+                            "why": "Modern architectures enable scalability, flexibility, and faster feature delivery compared to monolithic legacy designs."
+                        },
+                        {
+                            "id": "2.1.4",
+                            "text": "What is the level of technical debt in the codebase, and how does it impact development velocity?",
+                            "why": "High technical debt slows development, increases bug rates, and makes the application increasingly expensive to maintain."
+                        },
+                        {
+                            "id": "2.1.5",
+                            "text": "How comprehensive and effective is the automated test suite covering the application?",
+                            "why": "Quality test coverage enables safe refactoring, reduces regression risks, and supports continuous delivery practices."
+                        }
+                    ]
+                },
+                {
+                    "name": "2.2. Operational Stability & Performance",
+                    "weight": 40,
+                    "rationale": "Reliable performance and minimal disruptions are essential for user satisfaction and business continuity.",
+                    "questions": [
+                        {
+                            "id": "2.2.1",
+                            "text": "What is the application's historical availability and mean time between failures (MTBF)?",
+                            "why": "Availability metrics provide objective evidence of reliability and help identify applications requiring stability improvements."
+                        },
+                        {
+                            "id": "2.2.2",
+                            "text": "How does the application perform under peak load conditions, and what are its scalability limits?",
+                            "why": "Performance under load determines the application's ability to support business growth and handle seasonal demand spikes."
+                        },
+                        {
+                            "id": "2.2.3",
+                            "text": "What is the mean time to recovery (MTTR) when incidents or outages occur?",
+                            "why": "Fast recovery capabilities minimize business impact during failures and indicate operational maturity."
+                        },
+                        {
+                            "id": "2.2.4",
+                            "text": "How many high-severity production incidents has the application experienced in the past year?",
+                            "why": "Incident frequency indicates stability problems and helps prioritize applications for reliability engineering."
+                        },
+                        {
+                            "id": "2.2.5",
+                            "text": "What monitoring, alerting, and diagnostic capabilities are in place for the application?",
+                            "why": "Comprehensive observability enables proactive issue detection, faster troubleshooting, and better user experience management."
+                        }
+                    ]
+                },
+                {
+                    "name": "2.3. Security & Compliance",
+                    "weight": 25,
+                    "rationale": "Security vulnerabilities and compliance gaps create business risks that must be addressed.",
+                    "questions": [
+                        {
+                            "id": "2.3.1",
+                            "text": "What critical or high-severity security vulnerabilities are currently open for this application?",
+                            "why": "Unaddressed vulnerabilities represent immediate security risks that could lead to data breaches or system compromises."
+                        },
+                        {
+                            "id": "2.3.2",
+                            "text": "How does the application handle sensitive data, and what encryption and access controls are implemented?",
+                            "why": "Proper data protection is essential for regulatory compliance and preventing unauthorized access to sensitive information."
+                        },
+                        {
+                            "id": "2.3.3",
+                            "text": "What compliance requirements (GDPR, HIPAA, PCI DSS) does the application need to meet, and how well does it comply?",
+                            "why": "Compliance gaps can result in legal penalties, fines, and loss of business licenses or certifications."
+                        },
+                        {
+                            "id": "2.3.4",
+                            "text": "When was the last security penetration test or comprehensive security assessment performed?",
+                            "why": "Regular security testing identifies vulnerabilities that automated scans might miss and validates the effectiveness of security controls."
+                        },
+                        {
+                            "id": "2.3.5",
+                            "text": "How are security updates and patches managed for the application and its dependencies?",
+                            "why": "Timely patch management is critical for addressing known vulnerabilities and maintaining a secure application posture."
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": 3,
+            "name": "3. Total Cost of Ownership",
+            "weight": 25,
+            "description": "Evaluates all costs associated with maintaining and operating the application.",
+            "aspects": [
+                {
+                    "name": "3.1. Direct & Operational Costs",
+                    "weight": 50,
+                    "rationale": "Understanding full costs reveals optimization opportunities and informs investment decisions.",
+                    "questions": [
+                        {
+                            "id": "3.1.1",
+                            "text": "What are the annual licensing, subscription, and infrastructure costs for this application?",
+                            "why": "Direct costs represent the most visible portion of TCO and are often the easiest to quantify and optimize."
+                        },
+                        {
+                            "id": "3.1.2",
+                            "text": "How many full-time equivalent (FTE) resources are dedicated to application support and maintenance?",
+                            "why": "Labor costs typically represent the largest component of TCO and should be optimized through automation and efficiency improvements."
+                        },
+                        {
+                            "id": "3.1.3",
+                            "text": "What are the costs associated with unplanned downtime and emergency support incidents?",
+                            "why": "Reactive support costs indicate stability problems and help justify investments in reliability improvements."
+                        },
+                        {
+                            "id": "3.1.4",
+                            "text": "What technical debt remediation and mandatory upgrade costs are anticipated over the next 3 years?",
+                            "why": "Future mandatory investments must be factored into TCO calculations to avoid budget surprises and ensure long-term sustainability."
+                        },
+                        {
+                            "id": "3.1.5",
+                            "text": "How do this application's costs compare to industry benchmarks or alternative solutions?",
+                            "why": "Benchmarking reveals cost optimization opportunities and helps determine if the application is economically efficient to maintain."
+                        }
+                    ]
+                },
+                {
+                    "name": "3.2. Efficiency & Optimization Potential",
+                    "weight": 50,
+                    "rationale": "Identifying efficiency opportunities can reduce costs and free up resources for strategic initiatives.",
+                    "questions": [
+                        {
+                            "id": "3.2.1",
+                            "text": "What opportunities exist to optimize infrastructure costs through right-sizing or cloud migration?",
+                            "why": "Infrastructure optimization often delivers quick cost savings with minimal application changes."
+                        },
+                        {
+                            "id": "3.2.2",
+                            "text": "How could automation reduce manual effort and support costs for this application?",
+                            "why": "Automation reduces labor costs, improves consistency, and allows staff to focus on higher-value activities."
+                        },
+                        {
+                            "id": "3.2.3",
+                            "text": "What percentage of support effort is reactive (firefighting) versus proactive (improvement) work?",
+                            "why": "High reactive effort indicates stability problems and creates a vicious cycle that prevents strategic improvements."
+                        },
+                        {
+                            "id": "3.2.4",
+                            "text": "How do the application's resource utilization and efficiency metrics compare to benchmarks?",
+                            "why": "Inefficient resource usage indicates optimization opportunities through performance tuning or architectural improvements."
+                        },
+                        {
+                            "id": "3.2.5",
+                            "text": "What cost reduction opportunities would modernization or platform consolidation enable?",
+                            "why": "Modernization can reduce costs through more efficient technologies, simplified architectures, and reduced maintenance overhead."
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": 4,
+            "name": "4. Modernization Potential",
+            "weight": 20,
+            "description": "Assesses the feasibility and business case for modernizing the application.",
+            "aspects": [
+                {
+                    "name": "4.1. Technical Feasibility",
+                    "weight": 40,
+                    "rationale": "Technical constraints and complexities determine modernization feasibility and approach.",
+                    "questions": [
+                        {
+                            "id": "4.1.1",
+                            "text": "How complex would it be to decouple and modernize components of this application incrementally?",
+                            "why": "Incremental modernization reduces risk and allows value delivery before completing the full modernization effort."
+                        },
+                        {
+                            "id": "4.1.2",
+                            "text": "What are the technical risks and challenges associated with modernizing this application?",
+                            "why": "Understanding technical risks helps plan mitigation strategies and set realistic expectations for modernization outcomes."
+                        },
+                        {
+                            "id": "4.1.3",
+                            "text": "How suitable is the application's architecture for cloud-native deployment models?",
+                            "why": "Cloud compatibility influences modernization approach, costs, and the benefits achievable through modernization."
+                        },
+                        {
+                            "id": "4.1.4",
+                            "text": "What is the quality and completeness of documentation needed to support modernization?",
+                            "why": "Poor documentation increases modernization risk and may require reverse engineering, adding time and cost to the effort."
+                        },
+                        {
+                            "id": "4.1.5",
+                            "text": "How accessible is the application's data for migration to modern platforms or architectures?",
+                            "why": "Data migration complexity often determines modernization feasibility and may drive the technical approach."
+                        }
+                    ]
+                },
+                {
+                    "name": "4.2. Business Case & Value",
+                    "weight": 60,
+                    "rationale": "Modernization must deliver clear business value to justify the investment and disruption.",
+                    "questions": [
+                        {
+                            "id": "4.2.1",
+                            "text": "What specific business benefits would modernization deliver (cost reduction, revenue growth, risk reduction)?",
+                            "why": "Clear articulation of benefits is essential for building a compelling business case and securing modernization funding."
+                        },
+                        {
+                            "id": "4.2.2",
+                            "text": "What is the estimated return on investment (ROI) and payback period for modernizing this application?",
+                            "why": "Financial metrics help prioritize modernization initiatives and ensure they deliver acceptable returns on investment."
+                        },
+                        {
+                            "id": "4.2.3",
+                            "text": "How would modernization enable new business capabilities or strategic initiatives?",
+                            "why": "Modernization should enable business transformation, not just technical improvement, to maximize value delivery."
+                        },
+                        {
+                            "id": "4.2.4",
+                            "text": "What is the opportunity cost of not modernizing this application?",
+                            "why": "Understanding the cost of inaction helps justify modernization investments by quantifying the risks of maintaining the status quo."
+                        },
+                        {
+                            "id": "4.2.5",
+                            "text": "How strong is executive sponsorship and business support for modernizing this application?",
+                            "why": "Strong sponsorship is critical for modernization success, as these initiatives often face organizational resistance and competing priorities."
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

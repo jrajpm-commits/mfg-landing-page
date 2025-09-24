@@ -1,0 +1,150 @@
+/* Cyberpunk Theme Overrides for Portfolio Rationalization Dashboard */
+
+.cyberpunk-theme {
+    /* Use variables from the main theme */
+    --primary: #0a2540;
+    --secondary: #00d4ff;
+    --accent: #7b68ee;
+    --neon-green: #00ff9d;
+    --neon-blue: #00ccff;
+    --neon-purple: #b967ff;
+    --light: #f8f9fa;
+    --dark: #0d1421;
+    --darker: #060912;
+    --gray: #6c757d;
+    --success: #00c9a7;
+
+    /* Override dashboard-specific colors */
+    --color-invest: var(--neon-green);
+    --color-modernize: var(--neon-blue);
+    --color-retain: var(--neon-purple);
+    --color-retire: #ff3860; /* A cyberpunk-ish red/pink */
+    --color-dark: var(--dark);
+    --color-light: var(--light);
+    --bg-color: var(--darker);
+    --text-color: var(--light);
+    --header-bg: rgba(10, 20, 35, 0.95);
+    --card-bg: rgba(20, 30, 48, 0.7);
+    --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.cyberpunk-theme body {
+    background-color: var(--darker);
+    color: var(--light);
+    background-image: 
+        radial-gradient(circle at 10% 20%, rgba(28, 58, 112, 0.15) 0%, transparent 20%),
+        radial-gradient(circle at 90% 80%, rgba(123, 104, 238, 0.1) 0%, transparent 20%);
+}
+
+.cyberpunk-theme header {
+    background-color: var(--header-bg);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+}
+
+.cyberpunk-theme header h1 {
+    color: var(--light);
+    background: linear-gradient(to right, var(--neon-green), var(--neon-blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.cyberpunk-theme .print-btn {
+    background: transparent;
+    border: 1px solid var(--neon-blue);
+    color: var(--neon-blue);
+}
+
+.cyberpunk-theme .print-btn:hover {
+    background: rgba(0, 204, 255, 0.1);
+    box-shadow: 0 0 15px rgba(0, 204, 255, 0.4);
+}
+
+.cyberpunk-theme #btn-add-app {
+    background: linear-gradient(45deg, var(--neon-green), var(--neon-blue));
+    color: var(--dark);
+    border: none;
+}
+
+.cyberpunk-theme .chart-container,
+.cyberpunk-theme .filters-panel,
+.cyberpunk-theme .quadrant-matrix {
+    background: var(--card-bg);
+    border: 1px solid rgba(0, 212, 255, 0.1);
+    backdrop-filter: blur(5px);
+}
+
+.cyberpunk-theme h3 {
+    color: var(--neon-green);
+}
+
+.cyberpunk-theme .quadrant {
+    color: var(--dark);
+    font-weight: 700;
+}
+
+.cyberpunk-theme .quadrant.invest { background-color: var(--color-invest); }
+.cyberpunk-theme .quadrant.modernize { background-color: var(--color-modernize); }
+.cyberpunk-theme .quadrant.retain { background-color: var(--color-retain); }
+.cyberpunk-theme .quadrant.retire { background-color: var(--color-retire); }
+
+.cyberpunk-theme .app-bubble {
+    background: var(--darker);
+    color: var(--light);
+    border: 2px solid var(--neon-blue);
+    text-shadow: 0 0 5px var(--neon-blue);
+}
+
+.cyberpunk-theme .app-bubble:hover {
+    box-shadow: 0 0 15px var(--neon-blue);
+}
+
+.cyberpunk-theme #app-list thead tr {
+    background-color: rgba(10, 25, 47, 0.9);
+}
+
+.cyberpunk-theme #app-list th {
+    color: var(--neon-green);
+}
+
+.cyberpunk-theme #app-list td {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cyberpunk-theme .app-details-modal {
+    background: var(--dark);
+    border: 1px solid var(--neon-blue);
+}
+
+.cyberpunk-theme .form-group label {
+    color: #ccc;
+}
+
+.cyberpunk-theme .form-group select,
+.cyberpunk-theme .form-group input {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.cyberpunk-theme .form-group select:focus,
+.cyberpunk-theme .form-group input:focus {
+    outline: none;
+    border-color: var(--neon-blue);
+    box-shadow: 0 0 10px rgba(0, 204, 255, 0.3);
+}
+
+.cyberpunk-theme #calculated-scores {
+    background: var(--darker);
+}
+
+.cyberpunk-theme #loading-overlay {
+    background: rgba(6, 9, 18, 0.9); /* --darker */
+    color: var(--neon-green);
+}
+
+.cyberpunk-theme #assessment-selector {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+}

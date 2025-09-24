@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Portfolio Intelligence Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        :root {
+            --color-invest: #2ecc71;
+            --color-modernize: #f39c12;
+            --color-retain: #3498db;
+            --color-retire: #e74c3c;
+            --color-dark: #2c3e50;
+            --color-light: #ecf0f1;
+        }
+        .app-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .quadrant-matrix {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: relative;
+            height: 400px;
+        }
+        .quadrant {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            opacity: 0.9;
+            transition: all 0.3s ease;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .quadrant:hover { opacity: 1; transform: scale(1.02); }
+        .quadrant.invest { top: 0; left: 50%; background-color: var(--color-invest); }
+        .quadrant.modernize { top: 0; left: 0; background-color: var(--color-modernize); }
+        .quadrant.retain { top: 50%; left: 50%; background-color: var(--color-retain); }
+        .quadrant.retire { top: 50%; left: 0; background-color: var(--color-retire); }
+        .app-bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 12px;
+            text-align: center;
+            padding: 5px;
+            box-sizing: border-box;
+            transform: translate(-50%, -50%);
+        }
+        .app-bubble:hover {
+            z-index: 100;
+            transform: translate(-50%, -50%) scale(1.2);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .filters-panel {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .app-details-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.3);
+            z-index: 1000;
+            width: 80%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+        .score-bar {
+            display: flex;
+            height: 20px;
+            background: #eee;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .score-segment {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .dimension-1 { background: #e74c3c; }
+        .dimension-2 { background: #f39c12; }
+        .dimension-3 { background: #3498db; }
+        .dimension-4 { background: #2ecc71; }
+        .assessment-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .form-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group select, .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .recommendation-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 15px;
+            color: white;
+            font-weight: bold;
+        }
+        .badge-invest { background-color: var(--color-invest); }
+        .badge-modernize { background-color: var(--color-modernize); }
+        .badge-retain { background-color: var(--color-retain); }
+        .badge-retire { background-color: var(--color-retire); }
+        .roadmap-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .roadmap-project {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-left: 5px solid var(--color-modernize);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Application Portfolio Intelligence</h1>
+        <div style="display: flex; align-items: center; gap: 15px; width: 100%;">
+            <a href="admin.html" class="print-btn" style="text-decoration: none; text-align: center; margin-bottom: 0;">Back to Admin</a>
+            <button id="btn-manage-bu" class="print-btn" style="background-color: #9b59b6;">Manage BUs</button>
+            <button id="btn-import-apps" class="print-btn" style="background-color: #16a085;">Import Apps</button>
+            <button id="btn-add-app" class="print-btn" style="background-color: #27ae60;">+ Add Application</button>
+            <button id="btn-export" class="print-btn" style="background-color: #8e44ad;">Export Report</button>
+            <button id="btn-view-roadmap" class="print-btn" style="background-color: #d35400;">View Modernization Roadmap</button>
+            <div style="margin-left: auto;">
+                <select id="assessment-selector" style="padding: 10px; border-radius: 5px; border: 1px solid #bdc3c7; min-width: 300px;"></select>
+            </div>
+        </div>
+    </header>
+
+    <input type="file" id="import-file-input" accept=".json" style="display: none;">
+
+    <div id="dashboard-error-container" style="display: none;"></div>
+
+    <div class="filters-panel">
+        <h3>Filters & Controls</h3>
+        <div>
+            <label>Business Unit:
+                <select id="filter-business-unit">
+                    <option value="all">All</option>
+                    <!-- Dynamically populated -->
+                </select>
+            </label>
+            <label>Portfolio Recommendation:
+                <select id="filter-recommendation">
+                    <option value="all">All</option>
+                    <option value="invest">Invest</option>
+                    <option value="modernize">Modernize</option>
+                    <option value="retain">Retain</option>
+                    <option value="retire">Retire</option>
+                </select>
+            </label>
+            <button id="btn-apply-filters">Apply Filters</button>
+            <button id="btn-clear-filters">Clear Filters</button>
+        </div>
+    </div>
+
+    <div class="app-grid">
+        <div class="quadrant-matrix" id="rationalization-matrix">
+            <div class="quadrant invest">INVEST<br>(High Value, Healthy)</div>
+            <div class="quadrant modernize">MODERNIZE<br>(High Value, Unhealthy)</div>
+            <div class="quadrant retain">RETAIN<br>(Low Value, Healthy)</div>
+            <div class="quadrant retire">RETIRE<br>(Low Value, Unhealthy)</div>
+            <!-- Application bubbles will be dynamically inserted here -->
+        </div>
+
+        <div class="chart-container">
+            <h3>Portfolio Distribution</h3>
+            <div id="chart-portfolio-distribution" style="height: 300px;"></div>
+        </div>
+    </div>
+
+    <div class="chart-container">
+        <h3>Investment Analysis</h3>
+        <div class="score-bar">
+            <div class="score-segment dimension-1" style="width: 30%;">Business Impact (30%)</div>
+            <div class="score-segment dimension-2" style="width: 25%;">Technical Health (25%)</div>
+            <div class="score-segment dimension-3" style="width: 25%;">TCO (25%)</div>
+            <div class="score-segment dimension-4" style="width: 20%;">Modernization (20%)</div>
+        </div>
+        <div id="chart-investment-analysis" style="height: 250px;"></div>
+    </div>
+
+    <div class="chart-container">
+        <h3>Application List</h3>
+        <table id="app-list" style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background-color: #eee;">
+                    <th>Application</th>
+                    <th>Business Unit</th>
+                    <th>Business Impact</th>
+                    <th>Technical Health</th>
+                    <th>TCO Score</th>
+                    <th>Modernization Potential</th>
+                    <th>Overall Score</th>
+                    <th>Recommendation</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Dynamic content will be inserted here -->
+            </tbody>
+        </table>
+    </div>
+
+    <div class="chart-container" id="roadmap-view" style="display: none;">
+        <h2>Modernization Roadmap</h2>
+        <div class="roadmap-container" id="roadmap-projects">
+            <!-- Modernization projects will be inserted here -->
+        </div>
+        <button id="btn-back-to-dashboard">Back to Dashboard</button>
+    </div>
+
+    <div class="modal-overlay" id="modal-overlay"></div>
+    <div class="app-details-modal" id="app-details">
+        <h2 id="modal-app-name">Application Assessment</h2>
+        <div class="assessment-form" id="modal-content">
+            <!-- Detailed assessment form will be inserted here -->
+        </div>
+        <div id="calculated-scores" style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 5px;">
+            <h3>Calculated Scores</h3>
+            <div id="score-results"></div>
+        </div>
+        <button id="btn-close-modal">Close</button>
+        <button id="btn-save-app">Save Assessment</button>
+    </div>
+
+    <!-- Business Unit Management Modal -->
+    <div class="modal-overlay" id="bu-modal-overlay"></div>
+    <div class="app-details-modal" id="bu-modal" style="max-width: 600px; display: none;">
+        <h2 id="bu-modal-title">Manage Business Units</h2>
+        <div id="bu-list-container" style="margin-bottom: 20px; max-height: 300px; overflow-y: auto;">
+            <!-- BU list will be rendered here -->
+        </div>
+        <div style="display: flex; gap: 10px; align-items: flex-end;">
+            <div class="form-group" style="flex-grow: 1; margin-bottom: 0;">
+                <label for="new-bu-name">Add New Business Unit</label>
+                <input type="text" id="new-bu-name" placeholder="e.g., Marketing">
+            </div>
+            <button id="btn-add-bu" class="print-btn" style="margin: 0; padding: 10px 15px;">Add</button>
+        </div>
+        <button id="btn-import-bu" class="print-btn" style="margin-top: 15px; background-color: #16a085;">Import BUs from JSON</button>
+        <button id="btn-close-bu-modal" class="print-btn" style="margin-top: 15px; background-color: #7f8c8d;">Close</button>
+        <input type="file" id="bu-import-file-input" accept=".json" style="display: none;">
+    </div>
+
+    <script src="storage.js"></script>
+    <script src="portfolio-rationalization.js?v=2"></script>
+</body>
+</html>
