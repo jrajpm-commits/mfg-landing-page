@@ -620,7 +620,7 @@ function attachEventListeners() {
     document.getElementById('btn-add-app').addEventListener('click', () => showAppDetails());
     document.getElementById('import-file-input').addEventListener('change', importApplications);
     document.getElementById('btn-export').addEventListener('click', exportToPDF);
-    document.getElementById('btn-view-roadmap').addEventListener('click', showRoadmap);
+    // document.getElementById('btn-view-roadmap').addEventListener('click', showRoadmap);
     document.getElementById('btn-back-to-dashboard').addEventListener('click', showDashboard);
     document.getElementById('btn-apply-filters').addEventListener('click', applyFilters);
     document.getElementById('btn-clear-filters').addEventListener('click', clearFilters);
