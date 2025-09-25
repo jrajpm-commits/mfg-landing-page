@@ -7,6 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link rel="stylesheet" href="theme-cyberpunk.css">
     <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -228,6 +229,9 @@
     </style>
 </head>
 <body>
+    <!-- Authentication Check -->
+    <script src="auth.js"></script>
+
     <div id="loading-overlay">
         <p>Initializing Dashboard...</p>
     </div>
@@ -238,6 +242,8 @@
             <!-- <button id="theme-toggle" class="print-btn" style="background-color: #95a5a6;">Toggle Theme</button> -->
             <a href="index.html" class="print-btn" style="background-color: #7f8c8d; text-decoration: none;">Back to Landing Page</a>
             <button id="btn-add-app" class="print-btn" style="background-color: #27ae60;">+ Add Application</button>
+            <button id="btn-export-framework" class="print-btn" style="background-color: #16a085;">Export Framework</button>
+            <button id="btn-export-excel" class="print-btn" style="background-color: #27ae60;">Export to Excel</button>
             <button id="btn-export" class="print-btn" style="background-color: #8e44ad;">Export Report</button>
             <!-- <button id="btn-view-roadmap" class="print-btn" style="background-color: #d35400;">View Modernization Roadmap</button> -->
             <div style="margin-left: auto;">

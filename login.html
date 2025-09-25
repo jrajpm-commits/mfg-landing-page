@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Tech Mahindra Manufacturing Demo</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: var(--darker);
+        }
+        .login-container {
+            background: rgba(20, 30, 48, 0.7);
+            padding: 40px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            backdrop-filter: blur(5px);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+        }
+        .login-container h1 {
+            font-size: 2rem;
+            color: var(--neon-green);
+            margin-bottom: 20px;
+        }
+        .login-container p {
+            color: #ccc;
+            margin-bottom: 30px;
+        }
+        #error-message {
+            color: #ff3860;
+            margin-bottom: 15px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>Private Demo Access</h1>
+        <p>Please enter the password to continue.</p>
+        <form id="login-form">
+            <div class="form-group">
+                <input type="password" id="password" class="form-control" placeholder="Password" required>
+            </div>
+            <p id="error-message">Incorrect password. Please try again.</p>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Enter</button>
+        </form>
+    </div>
+
+    <script>
+        // Redirect if already authenticated
+        if (sessionStorage.getItem('isAuthenticated') === 'true') {
+            window.location.href = 'index.html';
+        }
+
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('error-message');
+            
+            // This is a simple, hardcoded password for demo purposes.
+            // In a real application, this would be a secure server-side check.
+            if (password === 'demo2024') {
+                // Set a flag in session storage
+                sessionStorage.setItem('isAuthenticated', 'true');
+                // Redirect to the main page
+                window.location.href = 'index.html';
+            } else {
+                errorMessage.style.display = 'block';
+                // Add a shake animation for bad password
+                const container = document.querySelector('.login-container');
+                container.style.animation = 'shake 0.5s';
+                setTimeout(() => {
+                    container.style.animation = '';
+                }, 500);
+            }
+        });
+
+        // Add shake animation keyframes to the head
+        const style = document.createElement('style');
+        style.innerHTML = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+                20%, 40%, 60%, 80% { transform: translateX(10px); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
+
+```
+
+#### New File: `auth.js`
+This central script will be included in all protected pages to keep the logic in one place.
+
+```diff
+--- /dev/null
+--- b/home/rajesh/mfg/mfg-landing-page/auth.js
++++ b/home/rajesh/mfg/mfg-landing-page/auth.js
+@@ -0,0 +1,11 @@
++(function() {
++    // Check if the user is authenticated.
++    const isAuthenticated = sessionStorage.getItem('isAuthenticated');
++
++    // If not authenticated, redirect to the login page.
++    // The check `window.location.pathname.endsWith('login.html')` prevents an infinite redirect loop.
++    if (isAuthenticated !== 'true' && !window.location.pathname.endsWith('login.html')) {
++        // Redirect to the login page, preserving any query strings or hash.
++        window.location.href = 'login.html';
++    }
++})();

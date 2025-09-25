@@ -323,8 +323,10 @@ function showAppDetails(app = null) {
     });
     
     // Set modal title
-    document.getElementById('modal-app-name').textContent = 
-        isEdit ? `Edit ${app.name}` : 'Add New Application';
+    const modalTitle = document.getElementById('modal-app-name');
+    modalTitle.innerHTML = `
+        ${isEdit ? `Edit ${app.name}` : 'Add New Application'}
+        <a href="README.md#portfolio-rationalization-guidelines" target="_blank" style="font-size: 0.8rem; font-weight: normal; margin-left: 15px;">View Scoring Guidelines</a>`;
     
     // Show modal
     modal.style.display = 'block';
@@ -506,6 +508,94 @@ function exportToPDF() {
     doc.save('Application-Portfolio-Report.pdf');
 }
 
+function exportToExcel() {
+    const applications = getApplications();
+    if (applications.length === 0) {
+        alert('No applications to export');
+        return;
+    }
+
+    // 1. Prepare the data for the worksheet
+    const dataForSheet = applications.map(app => {
+        return {
+            'ID': app.id,
+            'Application Name': app.name,
+            'Business Unit': app.businessUnit,
+            'Description': app.description,
+            'Recommendation': app.scores.recommendation,
+            'Overall Score': app.scores.overall,
+            'Business Impact': app.scores.businessImpact,
+            'Technical Health': app.scores.technicalHealth,
+            'TCO Score': app.scores.tco,
+            'Modernization Potential': app.scores.modernization,
+            'Created Date': new Date(app.created).toLocaleDateString(),
+            'Last Updated': new Date(app.lastUpdated).toLocaleDateString()
+        };
+    });
+
+    // 2. Create a new workbook and a worksheet
+    const worksheet = XLSX.utils.json_to_sheet(dataForSheet);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Portfolio');
+
+    // 3. Auto-size columns for better readability
+    const objectMaxLength = [];
+    dataForSheet.forEach(app => {
+        Object.keys(app).forEach((key, i) => {
+            let len = (app[key] || "").toString().length;
+            objectMaxLength[i] = Math.max(objectMaxLength[i] || 0, len);
+        });
+    });
+    worksheet["!cols"] = objectMaxLength.map(w => ({ wch: w + 2 })); // Add a little padding
+
+    // 4. Trigger the download
+    XLSX.writeFile(workbook, 'Application_Portfolio.xlsx');
+}
+
+function exportFrameworkToExcel() {
+    if (!assessmentFramework) {
+        alert("Assessment framework is not loaded yet.");
+        return;
+    }
+
+    const dataForSheet = [];
+
+    assessmentFramework.dimensions.forEach(dimension => {
+        dimension.aspects.forEach(aspect => {
+            aspect.questions.forEach(question => {
+                dataForSheet.push({
+                    'Dimension Name': dimension.name,
+                    'Dimension Weight (%)': dimension.weight,
+                    'Aspect Name': aspect.name,
+                    'Aspect Weight (%)': aspect.weight,
+                    'Aspect Rationale': aspect.rationale,
+                    'Question ID': question.id,
+                    'Question Text': question.text,
+                    'Question Rationale (Why)': question.why,
+                    'Scoring': 'User provides a score from 1 (Low) to 10 (High)'
+                });
+            });
+        });
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(dataForSheet);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Assessment Framework');
+
+    // Auto-size columns for better readability
+    const objectMaxLength = [];
+    dataForSheet.forEach(row => {
+        Object.values(row).forEach((value, i) => {
+            const len = (value || "").toString().length;
+            objectMaxLength[i] = Math.max(objectMaxLength[i] || 0, len);
+        });
+    });
+    worksheet["!cols"] = objectMaxLength.map(w => ({ wch: Math.min(w + 2, 80) })); // Add padding, max width 80
+
+    // Trigger the download
+    XLSX.writeFile(workbook, 'Assessment_Framework_Details.xlsx');
+}
+
 function renderDashboard() {
     renderApplicationBubbles();
     renderApplicationList();
@@ -619,6 +709,8 @@ function attachEventListeners() {
     // });
     document.getElementById('btn-add-app').addEventListener('click', () => showAppDetails());
     document.getElementById('import-file-input').addEventListener('change', importApplications);
+    document.getElementById('btn-export-framework').addEventListener('click', exportFrameworkToExcel);
+    document.getElementById('btn-export-excel').addEventListener('click', exportToExcel);
     document.getElementById('btn-export').addEventListener('click', exportToPDF);
     // document.getElementById('btn-view-roadmap').addEventListener('click', showRoadmap);
     document.getElementById('btn-back-to-dashboard').addEventListener('click', showDashboard);

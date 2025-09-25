@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manufacturing Enterprise Independence Assessment</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.1.0/docx.min.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/pptxgenjs/3.11.0/pptxgen.min.js"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+
+<style>
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            color: #333;
+            line-height: 1.6;
+            background-color: #f5f7fa;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            padding: 40px;
+            border-radius: 8px;
+            position: relative;
+        }
+        
+        /* Export Controls */
+        .export-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .export-btn {
+            padding: 8px 15px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        
+        .export-btn:hover {
+            background: #2980b9;
+        }
+        
+        /* Typography */
+        h1, h2, h3, h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        h1 {
+            font-size: 32px;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+        }
+        
+        h2 {
+            font-size: 26px;
+            margin-top: 30px;
+            border-left: 5px solid #3498db;
+            padding-left: 15px;
+        }
+        
+        h3 {
+            font-size: 20px;
+            color: #2980b9;
+            margin-top: 25px;
+        }
+        
+        h4 {
+            font-size: 18px;
+            color: #34495e;
+        }
+        
+        p {
+            margin-bottom: 15px;
+        }
+        
+        /* Header Section */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .org-info {
+            flex: 2;
+        }
+        
+        .score-summary {
+            flex: 1;
+            text-align: center;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .overall-score {
+            font-size: 42px;
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        
+        /* Executive Summary */
+        .executive-summary {
+            background: #f0f7ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 5px solid #3498db;
+        }
+        
+        .key-findings {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .finding-card {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .finding-high {
+            border-top: 4px solid #e74c3c;
+        }
+        
+        .finding-medium {
+            border-top: 4px solid #f39c12;
+        }
+        
+        .finding-low {
+            border-top: 4px solid #2ecc71;
+        }
+        
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: #3498db;
+            color: white;
+            font-weight: 600;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        tr:hover {
+            background-color: #f1f8ff;
+        }
+        
+        /* Heatmap */
+        .heatmap {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 25px 0;
+        }
+        
+        .dimension-card {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            border-left: 5px solid #3498db;
+        }
+        
+        .dimension-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .dimension-score {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .score-critical {
+            color: #e74c3c;
+        }
+        
+        .score-moderate {
+            color: #f39c12;
+        }
+        
+        .score-stable {
+            color: #2ecc71;
+        }
+        
+        /* Matrix */
+        .matrix-container {
+            overflow-x: auto;
+            margin: 25px 0;
+        }
+        
+        .complexity-matrix {
+            min-width: 800px;
+        }
+        
+        .matrix-cell {
+            text-align: center;
+            padding: 8px 5px;
+            font-weight: 600;
+        }
+        
+        .cell-critical {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .cell-moderate {
+            background-color: #f39c12;
+            color: white;
+        }
+        
+        .cell-independent {
+            background-color: #2ecc71;
+            color: white;
+        }
+        
+        .cell-na {
+            background-color: #bdc3c7;
+            color: #7f8c8d;
+        }
+        
+        /* Recommendations */
+        .recommendation {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            border-left: 4px solid #3498db;
+        }
+        
+        .timeline {
+            display: flex;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+        
+        .timeline-phase {
+            min-width: 200px;
+            padding: 15px;
+            margin-right: 15px;
+            border-radius: 6px;
+            background: #ecf0f1;
+        }
+        
+        .phase-immediate {
+            border-left: 5px solid #e74c3c;
+        }
+        
+        .phase-short {
+            border-left: 5px solid #f39c12;
+        }
+        
+        .phase-medium {
+            border-left: 5px solid #3498db;
+        }
+        
+        .phase-long {
+            border-left: 5px solid #2ecc71;
+        }
+        
+        /* Risk Matrix */
+        .risk-matrix {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .risk-item {
+            padding: 15px;
+            border-radius: 6px;
+            color: white;
+            text-align: center;
+        }
+        
+        .risk-high {
+            background: #e74c3c;
+        }
+        
+        .risk-medium {
+            background: #f39c12;
+        }
+        
+        .risk-low {
+            background: #2ecc71;
+        }
+        
+        /* Print Styles */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .container {
+                box-shadow: none;
+                padding: 0;
+            }
+            
+            .header, .executive-summary {
+                page-break-after: avoid;
+            }
+            
+            h2, h3 {
+                page-break-after: avoid;
+            }
+            
+            table {
+                page-break-inside: avoid;
+            }
+            
+            .recommendation {
+                page-break-inside: avoid;
+            }
+            
+            .export-controls {
+                display: none;
+            }
+        }
+        
+        /* Utility Classes */
+        .text-center {
+            text-align: center;
+        }
+        
+        .mb-20 {
+            margin-bottom: 20px;
+        }
+        
+        .mt-20 {
+            margin-top: 20px;
+        }
+        
+        .status-critical {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .status-moderate {
+            color: #f39c12;
+            font-weight: bold;
+        }
+        
+        .status-stable {
+            color: #2ecc71;
+            font-weight: bold;
+        }
+        
+        /* Loading indicator */
+        .loading {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <!-- Authentication Check -->
+    <script src="auth.js"></script>
+
+    <div class="loading" id="loadingIndicator">Generating document... Please wait.</div>
+    
+    <div class="container" id="reportContent">
+        <div class="export-controls">
+            <button class="export-btn" id="exportPdf">Export to PDF</button>
+            <button class="export-btn" id="exportDocx">Export to DOCX</button>
+            <button class="export-btn" id="exportPptx">Export to PPTX</button>
+        </div>
+        
+        <!-- Header Section -->
+        <div class="header">
+            <div class="org-info">
+                <h1>Manufacturing Enterprise Independence Assessment</h1>
+                <p><strong>Assessment Date:</strong> October 26, 2023</p>
+                <p><strong>Subject Organization:</strong> Org HorseISIT (Automotive Manufacturing Spin-off)</p>
+                <p><strong>Assessment Scope:</strong> 8 Geographical Regions, 200+ Applications, 15 Manufacturing Plants</p>
+            </div>
+            <div class="score-summary">
+                <p>Overall Independence Readiness Score</p>
+                <div class="overall-score">42%</div>
+                <p>Critical gaps in 4 of 7 dimensions</p>
+            </div>
+        </div>
+        
+        <!-- Executive Summary -->
+        <section class="executive-summary">
+            <h2>Executive Summary</h2>
+            <p><strong>Overall Independence Readiness Score: 42%</strong> - Critical gaps identified in 4 of 7 dimensions requiring immediate attention.</p>
+            
+            <div class="key-findings">
+                <div class="finding-card finding-high">
+                    <h4>🟥 High Risk Areas</h4>
+                    <ul>
+                        <li>Dependency Management (15%)</li>
+                        <li>Operational Sovereignty (28%)</li>
+                    </ul>
+                </div>
+                <div class="finding-card finding-medium">
+                    <h4>🟨 Medium Risk Areas</h4>
+                    <ul>
+                        <li>Manufacturing Operations (45%)</li>
+                        <li>Change Management (38%)</li>
+                    </ul>
+                </div>
+                <div class="finding-card finding-low">
+                    <h4>🟩 Low Risk Areas</h4>
+                    <ul>
+                        <li>Engineering Capabilities (65%)</li>
+                        <li>Portfolio Governance (72%)</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <p><strong>Primary Recommendation:</strong> Immediate focus on contractual separation and manufacturing system independence to prevent business disruption.</p>
+        </section>
+        
+        <!-- Assessment Methodology -->
+        <section>
+            <h2>1. Assessment Methodology & Framework</h2>
+            
+            <h3>1.1 Assessment Dimensions & Weighting</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Dimension</th>
+                        <th>Weight</th>
+                        <th>Score</th>
+                        <th>Status</th>
+                        <th>Criticality</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Dependency Eradication</td>
+                        <td>35%</td>
+                        <td class="status-critical">15%</td>
+                        <td>Critical</td>
+                        <td>High</td>
+                    </tr>
+                    <tr>
+                        <td>Operational Sovereignty</td>
+                        <td>25%</td>
+                        <td class="status-critical">28%</td>
+                        <td>Critical</td>
+                        <td>High</td>
+                    </tr>
+                    <tr>
+                        <td>Manufacturing Operations</td>
+                        <td>15%</td>
+                        <td class="status-moderate">45%</td>
+                        <td>Moderate</td>
+                        <td>High</td>
+                    </tr>
+                    <tr>
+                        <td>Engineering & Product Development</td>
+                        <td>5%</td>
+                        <td class="status-stable">65%</td>
+                        <td>Stable</td>
+                        <td>Medium</td>
+                    </tr>
+                    <tr>
+                        <td>Portfolio Governance</td>
+                        <td>5%</td>
+                        <td class="status-stable">72%</td>
+                        <td>Stable</td>
+                        <td>Medium</td>
+                    </tr>
+                    <tr>
+                        <td>Change Management</td>
+                        <td>10%</td>
+                        <td class="status-moderate">38%</td>
+                        <td>Moderate</td>
+                        <td>High</td>
+                    </tr>
+                    <tr>
+                        <td>Application Portfolio Rationalization</td>
+                        <td>5%</td>
+                        <td class="status-moderate">55%</td>
+                        <td>Moderate</td>
+                        <td>Medium</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3>1.2 Geographical Distribution Analysis</h3>
+            <p><strong>Global vs Local Capabilities Matrix:</strong></p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Capability Type</th>
+                        <th>Global (Centralized)</th>
+                        <th>Regional (8 Geographies)</th>
+                        <th>Local (Plant-level)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Product Engineering</td>
+                        <td>✅ PLM, CAD, Simulation</td>
+                        <td>⚠️ Regional Adaptations</td>
+                        <td>❌ Not Applicable</td>
+                    </tr>
+                    <tr>
+                        <td>Process Engineering</td>
+                        <td>✅ Standard Processes</td>
+                        <td>✅ Regional Compliance</td>
+                        <td>⚠️ Plant-specific</td>
+                    </tr>
+                    <tr>
+                        <td>MES Systems</td>
+                        <td>❌ Not Applicable</td>
+                        <td>⚠️ Regional Instances</td>
+                        <td>✅ Plant-specific</td>
+                    </tr>
+                    <tr>
+                        <td>PLM</td>
+                        <td>✅ Global Instance</td>
+                        <td>❌ Not Applicable</td>
+                        <td>❌ Not Applicable</td>
+                    </tr>
+                    <tr>
+                        <td>Custom Applications</td>
+                        <td>⚠️ Mixed (40% Global)</td>
+                        <td>✅ Regional (60%)</td>
+                        <td>❌ Not Applicable</td>
+                    </tr>
+                    <tr>
+                        <td>COTS Applications</td>
+                        <td>✅ Global Licenses</td>
+                        <td>⚠️ Regional Config</td>
+                        <td>✅ Local instances</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        
+        <!-- Detailed Dimension Assessment -->
+        <section>
+            <h2>2. Detailed Dimension Assessment</h2>
+            
+            <h3>2.1 Heatmap: Dimension & Aspect Performance</h3>
+            <div class="heatmap">
+                <div class="dimension-card">
+                    <div class="dimension-header">
+                        <h4>Dependency Eradication</h4>
+                        <div class="dimension-score score-critical">15%</div>
+                    </div>
+                    <p><strong>Contractual Independence:</strong> 10% 🔻</p>
+                    <p><strong>Technical Interlock:</strong> 18% 🔻</p>
+                    <p><strong>TSA Governance:</strong> 25% ➡️</p>
+                    <p class="status-critical">85% apps on shared licenses</p>
+                </div>
+                
+                <div class="dimension-card">
+                    <div class="dimension-header">
+                        <h4>Operational Sovereignty</h4>
+                        <div class="dimension-score score-critical">28%</div>
+                    </div>
+                    <p><strong>Architectural Integrity:</strong> 22% 🔻</p>
+                    <p><strong>Security & Compliance:</strong> 35% 🔺</p>
+                    <p><strong>Process Maturity:</strong> 30% ➡️</p>
+                    <p class="status-critical">Monolithic ERP dependency</p>
+                </div>
+                
+                <div class="dimension-card">
+                    <div class="dimension-header">
+                        <h4>Manufacturing Operations</h4>
+                        <div class="dimension-score score-moderate">45%</div>
+                    </div>
+                    <p><strong>Shop Floor Systems:</strong> 40% 🔻</p>
+                    <p><strong>Quality Management:</strong> 55% 🔺</p>
+                    <p><strong>Supply Chain Systems:</strong> 45% ➡️</p>
+                    <p class="status-moderate">MES varies by region</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Integrated Complexity Matrix -->
+        <section>
+            <h2>3. Integrated Complexity Matrix</h2>
+            
+            <h3>3.1 Component vs Capability Dependency Analysis</h3>
+            <div class="matrix-container">
+                <table class="complexity-matrix">
+                    <thead>
+                        <tr>
+                            <th>Component / Capability</th>
+                            <th>Product Engineering</th>
+                            <th>Process Engineering</th>
+                            <th>Manufacturing Execution</th>
+                            <th>Quality Management</th>
+                            <th>Supply Chain</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Global PLM System</strong></td>
+                            <td class="matrix-cell cell-critical">Critical</td>
+                            <td class="matrix-cell cell-critical">Critical</td>
+                            <td class="matrix-cell cell-moderate">Moderate</td>
+                            <td class="matrix-cell cell-moderate">Moderate</td>
+                            <td class="matrix-cell cell-na">N/A</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Regional MES</strong></td>
+                            <td class="matrix-cell cell-na">N/A</td>
+                            <td class="matrix-cell cell-moderate">Moderate</td>
+                            <td class="matrix-cell cell-critical">Critical</td>
+                            <td class="matrix-cell cell-independent">Independent</td>
+                            <td class="matrix-cell cell-moderate">Moderate</td>
+                        </tr>
+                        <tr>
+                            <td><strong>ERP System</strong></td>
+                            <td class="matrix-cell cell-moderate">Moderate</td>
+                            <td class="matrix-cell cell-moderate">Moderate</td>
+                            <td class="matrix-cell cell-moderate">Moderate</td>
+                            <td class="matrix-cell cell-moderate">Moderate</td>
+                            <td class="matrix-cell cell-critical">Critical</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        
+        <!-- Recommendations -->
+        <section>
+            <h2>7. Recommendations & Roadmap</h2>
+            
+            <div class="timeline">
+                <div class="timeline-phase phase-immediate">
+                    <h4>Immediate Actions (0-3 months)</h4>
+                    <ul>
+                        <li>Execute Critical License Transfers</li>
+                        <li>Establish Interim Governance</li>
+                        <li>Deploy Regional Recipe Servers</li>
+                    </ul>
+                </div>
+                
+                <div class="timeline-phase phase-short">
+                    <h4>Short-term Initiatives (3-6 months)</h4>
+                    <ul>
+                        <li>Complete Application Rationalization</li>
+                        <li>Implement Regional MES Standards</li>
+                        <li>Establish Independent Support Model</li>
+                    </ul>
+                </div>
+                
+                <div class="timeline-phase phase-medium">
+                    <h4>Medium-term Transformation (6-12 months)</h4>
+                    <ul>
+                        <li>Deploy Independent ERP Instance</li>
+                        <li>Standardize Global Engineering Platform</li>
+                        <li>Implement Digital Manufacturing Platform</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Footer -->
+        <footer class="mt-20" style="border-top: 1px solid #eee; padding-top: 20px;">
+            <p><strong>Report Generated:</strong> October 26, 2023 | <strong>Assessment Team:</strong> Enterprise Architecture Group</p>
+            <p><em>Confidential: For Internal Use Only</em></p>
+        </footer>
+    </div>
+
+    <script>
+        // Show loading indicator
+        function showLoading() {
+            document.getElementById('loadingIndicator').style.display = 'block';
+        }
+        
+        // Hide loading indicator
+        function hideLoading() {
+            document.getElementById('loadingIndicator').style.display = 'none';
+        }
+        
+        // Export to PDF
+        document.getElementById('exportPdf').addEventListener('click', function() {
+            showLoading();
+            
+            const element = document.getElementById('reportContent');
+            const options = {
+                margin: 10,
+                filename: 'Manufacturing_Independence_Assessment.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            
+            html2pdf().set(options).from(element).save().then(() => {
+                hideLoading();
+            });
+        });
+        
+        // Export to DOCX (simplified version - creates a basic Word document)
+        document.getElementById('exportDocx').addEventListener('click', function() {
+            showLoading();
+            
+            // Create a simple text version for DOCX export
+            let content = "MANUFACTURING ENTERPRISE INDEPENDENCE ASSESSMENT\n\n";
+            content += "Assessment Date: October 26, 2023\n";
+            content += "Subject Organization: Org HorseISIT\n";
+            content += "Overall Independence Readiness Score: 42%\n\n";
+            
+            // Add executive summary
+            content += "EXECUTIVE SUMMARY\n";
+            content += "Overall Independence Readiness Score: 42% - Critical gaps identified in 4 of 7 dimensions requiring immediate attention.\n\n";
+            
+            // Add key findings
+            content += "KEY FINDINGS:\n";
+            content += "- High Risk Areas: Dependency Management (15%), Operational Sovereignty (28%)\n";
+            content += "- Medium Risk Areas: Manufacturing Operations (45%), Change Management (38%)\n";
+            content += "- Low Risk Areas: Engineering Capabilities (65%), Portfolio Governance (72%)\n\n";
+            
+            // Create a Blob with the content
+            const blob = new Blob([content], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'Manufacturing_Independence_Assessment.docx';
+            link.click();
+            
+            hideLoading();
+        });
+        
+        // Export to PPTX
+        document.getElementById('exportPptx').addEventListener('click', function() {
+            showLoading();
+            
+            // const pptx = new pptxgen();
+            let pptx = new PptxGenJS();
+            // Slide 1: Title
+            let slide = pptx.addSlide();
+            slide.addText("Manufacturing Enterprise Independence Assessment", 
+                { x: 0.5, y: 1, w: '90%', h: 1.5, fontSize: 24, bold: true, color: '2C3E50' });
+            slide.addText("Org HorseISIT", 
+                { x: 0.5, y: 2.5, w: '90%', h: 1, fontSize: 18, color: '2980B9' });
+            slide.addText("Overall Readiness Score: 42%", 
+                { x: 0.5, y: 3.5, w: '90%', h: 1, fontSize: 16, color: 'E74C3C', bold: true });
+            slide.addText("Assessment Date: October 26, 2023", 
+                { x: 0.5, y: 4.5, w: '90%', h: 0.5, fontSize: 12 });
+            
+            // Slide 2: Executive Summary
+            slide = pptx.addSlide();
+            slide.addText("Executive Summary", 
+                { x: 0.5, y: 0.5, w: '90%', h: 1, fontSize: 20, bold: true, color: '2C3E50' });
+            slide.addText("Overall Independence Readiness: 42%", 
+                { x: 0.5, y: 1.5, w: '90%', h: 0.5, fontSize: 16, bold: true, color: 'E74C3C' });
+            slide.addText("Critical gaps in 4 of 7 dimensions requiring immediate attention", 
+                { x: 0.5, y: 2.2, w: '90%', h: 0.5, fontSize: 14 });
+            
+            // Add bullet points
+            const bullets = [
+                "High Risk: Dependency Management (15%), Operational Sovereignty (28%)",
+                "Medium Risk: Manufacturing Operations (45%), Change Management (38%)",
+                "Low Risk: Engineering Capabilities (65%), Portfolio Governance (72%)"
+            ];
+            
+            let yPos = 3.0;
+            bullets.forEach(bullet => {
+                slide.addText(`• ${bullet}`, { x: 0.7, y: yPos, w: '85%', h: 0.5, fontSize: 12 });
+                yPos += 0.6;
+            });
+            
+            // Slide 3: Assessment Dimensions
+            slide = pptx.addSlide();
+            slide.addText("Assessment Dimensions & Weighting", 
+                { x: 0.5, y: 0.5, w: '90%', h: 1, fontSize: 20, bold: true, color: '2C3E50' });
+            
+            // Create a table for dimensions
+            const tableData = [
+                [{ text: "Dimension", options: { bold: true, color: 'FFFFFF', fill: '3498DB' } }, { text: "Weight", options: { bold: true, color: 'FFFFFF', fill: '3498DB' } }, { text: "Score", options: { bold: true, color: 'FFFFFF', fill: '3498DB' } }, { text: "Status", options: { bold: true, color: 'FFFFFF', fill: '3498DB' } }],
+                ["Dependency Eradication", "35%", "15%", { text: "Critical", options: { color: 'E74C3C' } }],
+                ["Operational Sovereignty", "25%", "28%", { text: "Critical", options: { color: 'E74C3C' } }],
+                ["Manufacturing Operations", "15%", "45%", { text: "Moderate", options: { color: 'F39C12' } }],
+                ["Engineering & Product Development", "5%", "65%", { text: "Stable", options: { color: '2ECC71' } }],
+                ["Portfolio Governance", "5%", "72%", { text: "Stable", options: { color: '2ECC71' } }],
+                ["Change Management", "10%", "38%", { text: "Moderate", options: { color: 'F39C12' } }],
+                ["Application Portfolio Rationalization", "5%", "55%", { text: "Moderate", options: { color: 'F39C12' } }]
+            ];
+            
+            slide.addTable(tableData, { x: 0.5, y: 1.8, w: 9.0, colW: [4, 1.5, 1.5, 2] });
+            
+            // Save the presentation
+            pptx.writeFile({ fileName: 'Manufacturing_Independence_Assessment.pptx' })
+                .then(() => {
+                    console.log('PPTX file generated successfully.');
+                    hideLoading();
+                })
+                .catch(err => console.error(err));
+        });
+    </script>
+</body>
+</html>
