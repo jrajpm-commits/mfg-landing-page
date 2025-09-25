@@ -95,25 +95,3 @@
     </script>
 </body>
 </html>
-
-```
-
-#### New File: `auth.js`
-This central script will be included in all protected pages to keep the logic in one place.
-
-```diff
---- /dev/null
---- b/home/rajesh/mfg/mfg-landing-page/auth.js
-+++ b/home/rajesh/mfg/mfg-landing-page/auth.js
-@@ -0,0 +1,11 @@
-+(function() {
-+    // Check if the user is authenticated.
-+    const isAuthenticated = sessionStorage.getItem('isAuthenticated');
-+
-+    // If not authenticated, redirect to the login page.
-+    // The check `window.location.pathname.endsWith('login.html')` prevents an infinite redirect loop.
-+    if (isAuthenticated !== 'true' && !window.location.pathname.endsWith('login.html')) {
-+        // Redirect to the login page, preserving any query strings or hash.
-+        window.location.href = 'login.html';
-+    }
-+})();
